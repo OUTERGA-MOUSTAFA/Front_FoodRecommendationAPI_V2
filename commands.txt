@@ -1,0 +1,17 @@
+# 1. create app
+npm create vite@latest recommandationplats -- --template react
+
+# 2. enter file
+cd my-app
+
+# 3. Dependencies
+npm install
+
+# 4. install libriries i need
+npm install react-hook-form zod @hookform/resolvers
+
+# 5. create src/components for inputs
+# 6. create src/pages for Login.jsx and Register.jsx forms generaly
+# 7. creaate src/schemas for roles of Zod
+# 8. install axios for routing
+ npm install axios
