@@ -1,80 +1,84 @@
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
-import axios from 'axios';
-// 1. declare (Schema)
-const loginSchema = z.object({
-    email: z.string().email("Email doit étre coorect"),
-    password: z.string().min(8, "password au minimum 8 caracters"),
-});
+import api from "../api/axios";
+import { useNavigate } from 'react-router-dom';
+import { registerSchema } from '../store/useAuthStore';
 
-const Login = () => {
-    // 2. config React Hook Form
-    const {
-        register,
-        handleSubmit,
-        formState: { errors, isValid }
-    } = useForm({
-        resolver: zodResolver(loginSchema),
-        mode: "onChange",
-    });
+const Register = () => {
+  const navigate = useNavigate();
+  const dietOptions = [
+    { id: 'vegan', label: 'Vegan' },
+    { id: 'no_sugar', label: 'Sans Sucre' },
+    { id: 'no_cholesterol', label: 'Sans Cholestérol' },
+    { id: 'gluten_free', label: 'Sans Gluten' },
+    { id: 'no_lactose', label: 'Sans Lactose' },
+  ];
 
-    
+  const { register, handleSubmit, formState: { errors, isValid } } = useForm({
+    resolver: zodResolver(registerSchema), // registerSchema jat men store
+    mode: "onChange",
+  });
 
-    // Login component
-    const onSubmit = async (data) => {
-        try {
-            const response = await axios.post('/Register', data);
+  const onSubmit = async (data) => {
+    try {
+      const res = await api.post("/register", data);
+      
+      // save Token redirect to plats
+      localStorage.setItem("token", res.data.access_token);
+      navigate("/plat");
+    } catch (err) {
+      console.log(err.response?.data);
+      alert("Erreur lors de l'inscription");
+    }
+  };
 
-            // if token ok return true
-            const token = response.data.token;
-            localStorage.setItem('token', token); // store on localstorage
+  return (
+    <div className="flex flex-col items-center p-8">
+      <h1 className="text-2xl font-bold mb-6">Créer un compte</h1>
+      
+      <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4 w-96 bg-white p-6 shadow-md rounded">
+        {/* Name */}
+        <input {...register("name")} placeholder="Nom complet" className="border p-2 rounded" />
+        {errors.name && <p className="text-red-500 text-sm">{errors.name.message}</p>}
 
-            alert("Rgister effectué avec succé");
-            // ridirect
-        } catch (error) {
-            console.error("Error logging in:", error.response.data);
-            alert("Email ou bien incorrect !");
-        }
-    };
+        {/* Email */}
+        <input {...register("email")} placeholder="Email" className="border p-2 rounded" />
+        {errors.email && <p className="text-red-500 text-sm">{errors.email.message}</p>}
 
-    return (
-        <div className="flex flex-col items-center p-8">
-            <h1 className="text-2xl font-bold mb-4">Login</h1>
+        {/* Passwords */}
+        <input type="password" {...register("password")} placeholder="Mot de passe" className="border p-2 rounded" />
+        {errors.password && <p className="text-red-500 text-sm">{errors.password.message}</p>}
 
-            <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4 w-80">
-                {/* Input Email */}
-                <div>
-                    <input
-                        {...register("email")}
-                        placeholder="Email@gmail.com"
-                        className="border p-2 rounded w-full"
-                    />
-                    {errors.email && <p className="text-red-500 text-sm">{errors.email.message}</p>}
-                </div>
+        <input type="password" {...register("confirmPassword")} placeholder="Confirmer mot de passe" className="border p-2 rounded" />
+        {errors.confirmPassword && <p className="text-red-500 text-sm">{errors.confirmPassword.message}</p>}
 
-                {/* Input Password */}
-                <div>
-                    <input
-                        type="password"
-                        {...register("password")}
-                        placeholder="password"
-                        className="border p-2 rounded w-full"
-                    />
-                    {errors.password && <p className="text-red-500 text-sm">{errors.password.message}</p>}
-                </div>
-
-                {/* Submit */}
-                <button
-                    type="submit"
-                    disabled={!isValid}
-                    className={`p-2 rounded text-white ${isValid ? 'bg-blue-500' : 'bg-gray-400'}`}
-                >
-                    Entre
-                </button>
-            </form>
+        {/* Dietary Tags (Checkboxes) */}
+        <div className="mt-4">
+          <p className="font-semibold mb-2">Profil alimentaire :</p>
+          <div className="grid grid-cols-2 gap-2">
+            {dietOptions.map((option) => (
+              <label key={option.id} className="flex items-center gap-2 text-sm cursor-pointer">
+                <input 
+                  type="checkbox" 
+                  value={option.id} 
+                  {...register("dietary_tags")} // RHF connaitre que c'est un array 
+                />
+                {option.label}
+              </label>
+            ))}
+          </div>
         </div>
-    );
+
+        <button 
+          type="submit" 
+          disabled={!isValid}
+          className={`mt-6 p-2 rounded text-white ${isValid ? 'bg-green-500' : 'bg-gray-400'}`}
+        >
+          S'inscrire
+        </button>
+      </form>
+    </div>
+  );
 };
 
-export default Login;
+export default Register;

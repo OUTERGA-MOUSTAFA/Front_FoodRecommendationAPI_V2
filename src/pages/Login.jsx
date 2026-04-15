@@ -2,7 +2,8 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import api from "../api/axios";
-
+import { useNavigate } from 'react-router-dom';
+import { useAuthStore } from '../store/useAuthStore';
 // 1. Schema roles
 const loginSchema = z.object({
     email: z.string().email("Email pa correct"),
@@ -10,6 +11,7 @@ const loginSchema = z.object({
 });
 
 const Login = () => {
+    const navigate = useNavigate();
     // 2. config React Hook Form
     const {
         register,
@@ -32,14 +34,18 @@ const Login = () => {
             // save user
             localStorage.setItem("user", JSON.stringify(res.data.user));
 
-            setUser(res.data.user);
+            useAuthStore.getState().setUser(res.data.user);
 
             navigate("/plat");
 
         } catch (err) {
-            console.log(err.response);
+            if (err.response && err.response.status === 401) {
+                alert("Email ou mot de passe incorrect");
+            } else {
+                alert("Une erreur est survenue. Réessayez plus tard.");
+            }
         }
-    
+
 };
 
 return (
