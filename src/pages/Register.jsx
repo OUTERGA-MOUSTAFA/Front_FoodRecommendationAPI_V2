@@ -25,7 +25,7 @@ const Register = () => {
       
       // save Token redirect to plats
       localStorage.setItem("token", res.data.access_token);
-      navigate("/plat");
+      navigate("/me");
     } catch (err) {
       console.log(err.response?.data);
       alert("Erreur lors de l'inscription");
