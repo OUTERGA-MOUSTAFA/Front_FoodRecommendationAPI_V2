@@ -1,7 +1,7 @@
 import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { useAuthStore } from './store/useAuthStore';
 import { AnimatePresence } from 'framer-motion'; // Make sure this is imported
-import Navbar from './components/Navbar';
+import Navbar from './components/NavBar';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import PlatsPage from './pages/PlatsPages';
