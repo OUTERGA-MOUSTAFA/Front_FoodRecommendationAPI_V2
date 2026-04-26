@@ -2,7 +2,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import api from "../api/axios";
 import { useNavigate } from 'react-router-dom';
-import { registerSchema } from '../store/useAuthStore';
+import { registerSchema, useAuthStore } from '../store/useAuthStore';
 
 const Register = () => {
   const navigate = useNavigate();
@@ -19,18 +19,22 @@ const Register = () => {
     mode: "onChange",
   });
 
-  const onSubmit = async (data) => {
-    try {
-      const res = await api.post("/register", data);
-      
-      // save Token redirect to plats
-      localStorage.setItem("token", res.data.access_token);
-      navigate("/me");
-    } catch (err) {
-      console.log(err.response?.data);
-      alert("Erreur lors de l'inscription");
-    }
-  };
+  const login = useAuthStore((state) => state.login);
+
+const onSubmit = async (data) => {
+  try {
+    const res = await api.post("/register", data);
+    
+    // Use the store instead of manual localStorage
+    // This keeps your UI in sync immediately
+    login(res.data.user, res.data.access_token); 
+    
+    navigate("/me");
+  } catch (err) {
+    console.error(err.response?.data);
+    alert("Erreur lors de l'inscription");
+  }
+};
 
   return (
     <div className="flex flex-col items-center p-8">
